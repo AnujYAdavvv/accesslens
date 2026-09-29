@@ -8,10 +8,28 @@ generator client {
   output   = "../app/generated/prisma"
 }
 
+enum AuditSource {
+  URL
+  HTML
+}
+
+enum AuditStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum Impact {
+  MINOR
+  MODERATE
+  SERIOUS
+  CRITICAL
+}
+
 datasource db {
   provider = "postgresql"
 }
-
 
 model User {
   id            String    @id
@@ -23,7 +41,7 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
-  
+  projects      Project[]
 
   @@map("user")
 }
@@ -73,4 +91,49 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model Project {
+  id        String   @id @default(cuid())
+  name      String
+  url       String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  audits    Audit[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Audit {
+  id          String      @id @default(cuid())
+  projectId   String
+  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  source      AuditSource
+  sourceUrl   String?
+  status      AuditStatus @default(PENDING)
+  error       String?
+  issueCount  Int         @default(0)
+  issues      Issue[]
+  createdAt   DateTime    @default(now())
+  completedAt DateTime?
+
+  @@index([projectId, createdAt(sort: Desc)])
+}
+
+model Issue {
+  id          String   @id @default(cuid())
+  auditId     String
+  audit       Audit    @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  ruleId      String
+  impact      Impact
+  description String
+  help        String
+  helpUrl     String
+  target      String
+  html        String
+  wcagTags    String[]
+
+  @@index([auditId])
 }
