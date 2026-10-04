@@ -1,7 +1,8 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
+  // Load these from node_modules at runtime instead of bundling them
+  serverExternalPackages: ['axe-core'],
+}
 
-export default nextConfig;
+export default nextConfig
