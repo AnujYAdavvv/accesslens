@@ -18,7 +18,7 @@ export const runAuditSchema = z.discriminatedUnion('source', [
         url: z.url({protocol: /^https?$/, error: 'Enter a valid URL'}),
     }),
     z.object({
-        source: z.literal('HTML'),
+        source: z.literal('html'),
         html: z.string().trim().min(1, 'Enter some HTML to audit').max(500000, 'The HTML is too long to audit'),
     })
 ])
